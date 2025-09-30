@@ -1,0 +1,7 @@
+version: 2
+packages:
+  - name: "db"
+    path: "./internal/database/queries"
+    engine: "postgresql"
+    schema: "./internal/database/migrations/schema.sql"
+    queries: "./internal/database/queries/*.sql"
