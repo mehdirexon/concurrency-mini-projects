@@ -11,5 +11,13 @@ func (a *Repository) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Repository) PostRegister(w http.ResponseWriter, r *http.Request) {
+<<<<<<< Updated upstream
 
+=======
+	// create a user
+
+	// send a activation mail
+
+	// subscribe the user to an account
+>>>>>>> Stashed changes
 }
