@@ -15,7 +15,7 @@ services:
   redis:
     image: 'redis:alpine'
     ports:
-      - "6349:6379"
+      - "6379:6379"
     restart: always
     volumes:
       - ./db-data/redis/:/data

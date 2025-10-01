@@ -38,3 +38,6 @@ test:
 	@echo "🧪 Running tests..."
 	@go test -v ./...
 	@echo "✅ Tests completed!"
+## load env: loads .env into the shell
+env:
+	@export $(grep -v '^#' .env | xargs)
