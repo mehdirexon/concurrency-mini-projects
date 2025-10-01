@@ -1,20 +1,36 @@
 package main
 
 import (
+	"encoding/gob"
 	"errors"
-	config "final-project/internal/config"
+	"final-project/internal/config"
 	"final-project/internal/database"
+	"final-project/internal/handlers"
 	"final-project/internal/helpers"
 	"final-project/internal/middlewares"
 	"final-project/internal/render"
 	"final-project/internal/router"
+	_ "final-project/internal/store"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
+	"time"
 
+	"github.com/alexedwards/scs/redisstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/joho/godotenv"
 )
+
+// Set up app config
+var app = &config.AppConfig{
+	InfoLogger:   nil,
+	ErrorLogger:  nil,
+	UseCache:     false,
+	InProduction: false,
+}
 
 func main() {
 	// Load environment variables
@@ -22,14 +38,6 @@ func main() {
 
 	if err != nil {
 		panic("Error loading .env file")
-	}
-
-	// Set up app config
-	var app = &config.AppConfig{
-		InfoLogger:   nil,
-		ErrorLogger:  nil,
-		UseCache:     false,
-		InProduction: false,
 	}
 
 	// Set up logging
@@ -41,6 +49,7 @@ func main() {
 	render.Register(app)
 	helpers.Register(app)
 	middlewares.Register(app)
+	router.New(handlers.GetRepo())
 
 	// Connect to the database
 	db := database.Init()
@@ -48,17 +57,31 @@ func main() {
 	if err != nil {
 		return
 	}
+	handlers.Register(app, database.New(db))
 
 	// Create Session
-	app.Session = config.SessionInit()
+	gob.Register(database.User{})
+	session := scs.New()
+	session.Lifetime = 24 * time.Hour
+	session.Store = redisstore.New(config.RedisInit())
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteLaxMode
+	session.Cookie.Secure = len(os.Getenv("REDIS")) > 0
+	app.Session = session
 
 	// Create channels
 
 	// Create Wait Group
 	app.Wait = &sync.WaitGroup{}
+
+	// Create a model
+
 	// Set up the application config
 
 	// Set up mail
+
+	// Listen for signal
+	go listenForShutdown()
 
 	// Listen for web connections
 	srv := &http.Server{
@@ -71,4 +94,22 @@ func main() {
 	if err = srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		app.ErrorLogger.Panic(err)
 	}
+}
+
+func listenForShutdown() {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	shutdown()
+	os.Exit(0)
+}
+
+func shutdown() {
+	// cleaning up
+	app.InfoLogger.Println("Cleaning up...")
+
+	app.Wait.Wait()
+
+	app.InfoLogger.Println("Closing channels...")
+
 }
