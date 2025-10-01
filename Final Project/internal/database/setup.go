@@ -20,7 +20,7 @@ func Register(app *config.AppConfig) {
 func Init() *sql.DB {
 	conn := connectDB()
 	if conn != nil {
-		// panic
+		//appConfig.ErrorLogger.Panic(conn.Ping())
 	}
 
 	return conn
