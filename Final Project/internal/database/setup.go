@@ -2,7 +2,7 @@ package database
 
 import (
 	"database/sql"
-	config "final-project/internal/config"
+	"final-project/internal/config"
 	"os"
 	"time"
 

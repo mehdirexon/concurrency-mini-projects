@@ -1,7 +1,7 @@
 package render
 
 import (
-	config "final-project/internal/config"
+	"final-project/internal/config"
 	"final-project/internal/helpers"
 	"final-project/internal/shared"
 	"net/http"

@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	config "final-project/internal/config"
+	"final-project/internal/config"
 	"net/http"
 )
 

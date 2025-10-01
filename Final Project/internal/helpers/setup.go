@@ -1,6 +1,6 @@
 package helpers
 
-import config "final-project/internal/config"
+import "final-project/internal/config"
 
 var app *config.AppConfig
 
