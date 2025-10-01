@@ -5,9 +5,6 @@ import (
 )
 
 func (a *Repository) ActivateAccount(w http.ResponseWriter, r *http.Request) {
-<<<<<<< Updated upstream
-=======
-
 	// validate url
 
 	// generate an invoice
@@ -15,6 +12,4 @@ func (a *Repository) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 	// send an email with attachments
 
 	// send an email with the invoice attached
-
->>>>>>> Stashed changes
 }
