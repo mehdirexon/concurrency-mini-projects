@@ -7,7 +7,9 @@ import (
 	"final-project/internal/database"
 	"final-project/internal/handlers"
 	"final-project/internal/helpers"
+	"final-project/internal/mail"
 	"final-project/internal/middlewares"
+	"final-project/internal/models"
 	"final-project/internal/render"
 	"final-project/internal/router"
 	_ "final-project/internal/store"
@@ -49,7 +51,11 @@ func main() {
 	render.Register(app)
 	helpers.Register(app)
 	middlewares.Register(app)
+
 	router.New(handlers.GetRepo())
+	mailer := mail.New(app)
+
+	// Repo stuffs
 
 	// Connect to the database
 	db := database.Init()
@@ -70,6 +76,9 @@ func main() {
 	app.Session = session
 
 	// Create channels
+	errorChan := make(chan error)
+	mailerChan := make(chan models.Message, 100)
+	mailerDoneChan := make(chan bool)
 
 	// Create Wait Group
 	app.Wait = &sync.WaitGroup{}
@@ -78,7 +87,12 @@ func main() {
 
 	// Set up the application config
 
-	// Set up mail
+	// Set up mailer
+	app.MailChan = mailerChan
+	app.MailErrorChan = errorChan
+	app.MailDoneChan = mailerDoneChan
+	
+	go mailer.ListenForMail()
 
 	// Listen for signal
 	go listenForShutdown()
@@ -110,6 +124,11 @@ func shutdown() {
 
 	app.Wait.Wait()
 
+	app.MailDoneChan <- true
+
 	app.InfoLogger.Println("Closing channels...")
 
+	close(app.MailChan)
+	close(app.MailDoneChan)
+	close(app.MailErrorChan)
 }
