@@ -28,7 +28,7 @@ func Init() *sql.DB {
 
 func connectDB() *sql.DB {
 	counts := 0
-	dsn := os.Getenv("DSN")
+	dsn := os.Getenv("DB_STRING")
 	if dsn == "" {
 		appConfig.ErrorLogger.Fatalln("🚫 🚫 DSN environment variable not set 🚫 🚫 ")
 	}
