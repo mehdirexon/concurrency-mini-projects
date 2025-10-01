@@ -1,7 +1,11 @@
 -- +goose Up
 INSERT INTO public.users(email, first_name, last_name, password, user_active, is_admin, created_at, updated_at)
 VALUES
+<<<<<<< Updated upstream
     ('admin@example.com','Admin','User','$2a$12$1zGLuYDDNvATh4RA4avbKuheAMpb1svexSzrQm7up.bnpwQHs0jNe',1,1,'2022-03-14 00:00:00','2022-03-14 00:00:00');
+=======
+    ('admin@example.com','Admin','User','$2a$10$Boj2SSjjZPW7AyzJ.tzGhuHTSLRhpVMN1sOOr01ERmdneG.NZbNgK',1,1,'2022-03-14 00:00:00','2022-03-14 00:00:00');
+>>>>>>> Stashed changes
 
 SELECT pg_catalog.setval('public.plans_id_seq', 1, false);
 SELECT pg_catalog.setval('public.user_id_seq', 2, true);

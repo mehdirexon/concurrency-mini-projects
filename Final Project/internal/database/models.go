@@ -5,7 +5,11 @@ import (
 	"time"
 )
 
+<<<<<<< Updated upstream
 const dbTimeout = time.Second * 3
+=======
+const dbTimeout = time.Second * 3000
+>>>>>>> Stashed changes
 
 var db *sql.DB
 
