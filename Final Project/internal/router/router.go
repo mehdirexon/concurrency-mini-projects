@@ -1,7 +1,7 @@
 package router
 
 import (
-	"final-project/internal/middlewares"
+	mw "final-project/internal/middlewares"
 	"net/http"
 )
 
@@ -9,9 +9,18 @@ func Register() http.Handler {
 
 	mux := http.NewServeMux()
 
-	middlewares.Use(middlewares.LoadSession)
+	mw.Use(mw.LoadSession)
 
-	mux.HandleFunc("GET /", middlewares.With(repo.Home, middlewares.LoadSession))
+	mux.HandleFunc("GET /", mw.With(repo.Home))
 
-	return mux
+	mux.HandleFunc("GET /login", mw.With(repo.Login))
+	mux.HandleFunc("POST /login", mw.With(repo.PostLogin))
+	mux.HandleFunc("GET /logout", mw.With(repo.Logout))
+
+	mux.HandleFunc("GET /register", mw.With(repo.Register))
+	mux.HandleFunc("POST /register", mw.With(repo.PostRegister))
+
+	mux.HandleFunc("POST /activate-account", mw.With(repo.ActivateAccount))
+
+	return mw.Apply(mux)
 }
