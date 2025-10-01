@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"final-project/internal/helpers"
+	"final-project/internal/models"
 	"final-project/internal/render"
 	"final-project/internal/shared"
 	"net/http"
@@ -38,6 +39,14 @@ func (a *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !validPassword {
+		msg := models.Message{
+			To:      email,
+			Subject: "failed log in attempt!",
+			Data:    "Invalid login attempt!",
+		}
+
+		helpers.SendEmail(msg)
+
 		a.App.Session.Put(r.Context(), shared.Error, "Invalid credentials.")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
