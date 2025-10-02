@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
@@ -44,8 +45,7 @@ func main() {
 
 	// Set up logging
 	app.InfoLogger = log.New(os.Stdout, "ℹ️ INFO\t", log.Ldate|log.Ltime)
-	app.ErrorLogger = log.New(os.Stdout, "❌ ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-
+	app.ErrorLogger = log.New(os.Stdout, "❌ ERROR\t", log.Ldate|log.Ltime|log.Lmicroseconds|log.Llongfile)
 	// Init modules
 	database.Register(app)
 	render.Register(app)
@@ -72,7 +72,7 @@ func main() {
 	session.Store = redisstore.New(config.RedisInit())
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
-	session.Cookie.Secure = len(os.Getenv("REDIS")) > 0
+	session.Cookie.Secure, _ = strconv.ParseBool(os.Getenv("PRODUCTION"))
 	app.Session = session
 
 	// Create channels
@@ -91,7 +91,7 @@ func main() {
 	app.MailChan = mailerChan
 	app.MailErrorChan = errorChan
 	app.MailDoneChan = mailerDoneChan
-	
+
 	go mailer.ListenForMail()
 
 	// Listen for signal
