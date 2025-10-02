@@ -2,6 +2,7 @@ package render
 
 import (
 	"final-project/internal/config"
+	"final-project/internal/database"
 	"final-project/internal/helpers"
 	"final-project/internal/shared"
 	"net/http"
@@ -25,7 +26,7 @@ type TemplateData struct {
 	Warning       string
 	Authenticated bool
 	Now           time.Time
-	//User	*data.user
+	User          *database.User
 }
 
 func AddDefaultData(td *TemplateData, r *http.Request) *TemplateData {
@@ -35,7 +36,12 @@ func AddDefaultData(td *TemplateData, r *http.Request) *TemplateData {
 
 	if helpers.IsAuthenticated(r) {
 		td.Authenticated = true
-		// TODO - get more user information
+		user, ok := app.Session.Get(r.Context(), "user").(database.User)
+		if !ok {
+			app.ErrorLogger.Println("can't get user from session")
+		} else {
+			td.User = &user
+		}
 	}
 	td.Now = time.Now()
 
