@@ -52,7 +52,14 @@ func (a *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.Active != 1 {
+		a.App.Session.Put(r.Context(), shared.Error, "Account is not activated. check your email.")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	a.App.Session.Put(r.Context(), "userID", user.ID)
+	a.App.InfoLogger.Printf("Storing user in session - Type: %T, Value: %+v\n", user, user)
 	a.App.Session.Put(r.Context(), "user", user)
 
 	a.App.Session.Put(r.Context(), shared.Flash, "Successful logged!")
