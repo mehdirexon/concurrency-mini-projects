@@ -7,4 +7,5 @@ const (
 	Home     = "home.page.gohtml"
 	Login    = "login.page.gohtml"
 	Register = "register.page.gohtml"
+	Plans    = "plans.page.gohtml"
 )
