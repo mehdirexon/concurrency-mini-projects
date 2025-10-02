@@ -34,4 +34,6 @@ go.work.sum
 # .idea/
 # .vscode/
 
+tmp/
 db-data
+/internal/service/pdf/manual.pdf

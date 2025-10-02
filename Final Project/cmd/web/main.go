@@ -4,14 +4,14 @@ import (
 	"encoding/gob"
 	"errors"
 	"final-project/internal/config"
-	"final-project/internal/database"
-	"final-project/internal/handlers"
 	"final-project/internal/helpers"
-	"final-project/internal/mail"
-	"final-project/internal/middlewares"
+	"final-project/internal/http/handlers"
+	"final-project/internal/http/middlewares"
+	"final-project/internal/http/render"
+	router2 "final-project/internal/http/router"
 	"final-project/internal/models"
-	"final-project/internal/render"
-	"final-project/internal/router"
+	"final-project/internal/service/mail"
+	"final-project/internal/store"
 	_ "final-project/internal/store"
 	"log"
 	"net/http"
@@ -46,61 +46,67 @@ func main() {
 	// Set up logging
 	app.InfoLogger = log.New(os.Stdout, "ℹ️ INFO\t", log.Ldate|log.Ltime)
 	app.ErrorLogger = log.New(os.Stdout, "❌ ERROR\t", log.Ldate|log.Ltime|log.Lmicroseconds|log.Llongfile)
+
 	// Init modules
-	database.Register(app)
+	store.Register(app)
 	render.Register(app)
 	helpers.Register(app)
 	middlewares.Register(app)
 
-	router.New(handlers.GetRepo())
+	// Repo
+	router2.New(handlers.GetRepo())
 	mailer := mail.New(app)
 
-	// Repo stuffs
-
 	// Connect to the database
-	db := database.Init()
+	db := store.Init()
 	err = db.Ping()
 	if err != nil {
 		return
 	}
-	handlers.Register(app, database.New(db))
+	handlers.Register(app, store.New(db))
 
 	// Create Session
-	gob.Register(database.User{})
+	gob.Register(store.User{})
 	session := scs.New()
 	session.Lifetime = 24 * time.Hour
-	session.Store = redisstore.New(config.RedisInit())
+	session.Store = redisstore.New(store.RedisInit())
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure, _ = strconv.ParseBool(os.Getenv("PRODUCTION"))
 	app.Session = session
 
 	// Create channels
-	errorChan := make(chan error)
 	mailerChan := make(chan models.Message, 100)
 	mailerDoneChan := make(chan bool)
+	mailErrorChan := make(chan error)
+
+	errorChan := make(chan error)
+	errorDoneChan := make(chan bool)
+
+	app.ErrorChan = errorChan
+	app.ErrorDoneChan = errorDoneChan
 
 	// Create Wait Group
 	app.Wait = &sync.WaitGroup{}
 
-	// Create a model
-
-	// Set up the application config
-
 	// Set up mailer
 	app.MailChan = mailerChan
-	app.MailErrorChan = errorChan
+	app.MailErrorChan = mailErrorChan
 	app.MailDoneChan = mailerDoneChan
 
+	// Run the background go routines
 	go mailer.ListenForMail()
 
 	// Listen for signal
 	go listenForShutdown()
 
+	// Listen for errors
+	go listenForErrors()
+
 	// Listen for web connections
 	srv := &http.Server{
 		Addr:    ":" + os.Getenv("PORT"),
-		Handler: router.Register(),
+		Handler: router2.Register(),
 	}
 
 	app.InfoLogger.Println("Starting server on port " + os.Getenv("PORT"))
@@ -109,11 +115,21 @@ func main() {
 		app.ErrorLogger.Panic(err)
 	}
 }
-
+func listenForErrors() {
+	for {
+		select {
+		case err := <-app.ErrorChan:
+			app.ErrorLogger.Println(err)
+		case <-app.ErrorDoneChan:
+			return
+		}
+	}
+}
 func listenForShutdown() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+
 	shutdown()
 	os.Exit(0)
 }
@@ -125,10 +141,14 @@ func shutdown() {
 	app.Wait.Wait()
 
 	app.MailDoneChan <- true
+	app.ErrorDoneChan <- true
 
 	app.InfoLogger.Println("Closing channels...")
 
 	close(app.MailChan)
 	close(app.MailDoneChan)
 	close(app.MailErrorChan)
+
+	close(app.ErrorDoneChan)
+	close(app.ErrorChan)
 }

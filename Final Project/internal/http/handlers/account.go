@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	"final-project/internal/service/signer"
 	"final-project/internal/shared"
-	"final-project/internal/signer"
 	"fmt"
 	"net/http"
 )

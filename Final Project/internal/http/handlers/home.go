@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"final-project/internal/render"
+	"final-project/internal/http/render"
 	"final-project/internal/shared"
 	"net/http"
 )

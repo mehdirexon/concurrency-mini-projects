@@ -1,9 +1,9 @@
 package middlewares
 
 import (
-	"final-project/internal/database"
 	"final-project/internal/helpers"
 	"final-project/internal/shared"
+	"final-project/internal/store"
 	"net/http"
 )
 
@@ -14,7 +14,7 @@ func Authenticate(next http.Handler) http.Handler {
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
-		user, ok := app.Session.Get(r.Context(), "user").(*database.User)
+		user, ok := app.Session.Get(r.Context(), "user").(*store.User)
 		if ok {
 			print(user)
 		}

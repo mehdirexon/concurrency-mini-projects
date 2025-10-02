@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"final-project/internal/helpers"
+	"final-project/internal/http/render"
 	"final-project/internal/models"
-	"final-project/internal/render"
 	"final-project/internal/shared"
 	"net/http"
 )
@@ -59,7 +59,6 @@ func (a *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a.App.Session.Put(r.Context(), "userID", user.ID)
-	a.App.InfoLogger.Printf("Storing user in session - Type: %T, Value: %+v\n", user, user)
 	a.App.Session.Put(r.Context(), "user", user)
 
 	a.App.Session.Put(r.Context(), shared.Flash, "Successful logged!")

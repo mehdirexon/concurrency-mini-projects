@@ -28,6 +28,7 @@ start: run
 stop:
 	@echo "🛑 Stopping..."
 	@-pkill -SIGTERM -f "./${BINARY_NAME}"
+	@docker exec -it finalproject-redis-1  redis-cli FLUSHALL
 	@echo "🛑 Stopped!"
 
 ## restart: stops and starts the application

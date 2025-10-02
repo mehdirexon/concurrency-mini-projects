@@ -1,22 +1,20 @@
 package store
 
-import "final-project/internal/database"
-
 type Store interface {
 	// GetAllUsers Users
-	GetAllUsers() ([]*database.User, error)
-	GetUserByID(id int) (*database.User, error)
-	GetUserByEmail(email string) (*database.User, error)
-	InsertUser(user database.User) (int, error)
-	UpdateUser(u *database.User) error
-	DeleteUser(u *database.User) error
+	GetAllUsers() ([]*User, error)
+	GetUserByID(id int) (*User, error)
+	GetUserByEmail(email string) (*User, error)
+	InsertUser(user User) (int, error)
+	UpdateUser(u *User) error
+	DeleteUser(u *User) error
 	DeleteUserByID(id int) error
-	ResetUserPassword(u *database.User, password string) error
-	UserPasswordMatches(u *database.User, plainText string) (bool, error)
+	ResetUserPassword(u *User, password string) error
+	UserPasswordMatches(u *User, plainText string) (bool, error)
 
 	// GetAllPlans Plans
-	GetAllPlans() ([]*database.Plan, error)
-	GetPlanByID(id int) (*database.Plan, error)
-	SubscribeUserToPlan(user database.User, plan database.Plan) error
-	AmountForDisplay(plan database.Plan) string
+	GetAllPlans() ([]*Plan, error)
+	GetPlanByID(id int) (*Plan, error)
+	SubscribeUserToPlan(user User, plan Plan) error
+	AmountForDisplay(plan Plan) string
 }

@@ -1,7 +1,7 @@
 package router
 
 import (
-	"final-project/internal/handlers"
+	"final-project/internal/http/handlers"
 )
 
 var repo *handlers.Repository

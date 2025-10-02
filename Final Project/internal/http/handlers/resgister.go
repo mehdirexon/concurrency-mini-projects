@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"final-project/internal/database"
 	"final-project/internal/helpers"
+	"final-project/internal/http/render"
 	"final-project/internal/models"
-	"final-project/internal/render"
+	"final-project/internal/service/signer"
 	"final-project/internal/shared"
-	"final-project/internal/signer"
+	"final-project/internal/store"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -28,7 +28,7 @@ func (a *Repository) PostRegister(w http.ResponseWriter, r *http.Request) {
 	// TODO Validate Data
 
 	// create a user
-	u := database.User{
+	u := store.User{
 		Email:     r.Form.Get("email"),
 		FirstName: r.Form.Get("first-name"),
 		LastName:  r.Form.Get("last-name"),

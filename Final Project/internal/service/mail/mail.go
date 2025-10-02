@@ -70,11 +70,14 @@ func (m *Mail) SendMail(msg models.Message, errorChan chan error) {
 	if msg.FromName == "" {
 		msg.FromName = m.FromName
 	}
-
-	data := map[string]any{
-		"message": msg.Data,
+	if msg.AttachmentMap == nil {
+		msg.AttachmentMap = make(map[string]string)
 	}
-	msg.DataMap = data
+
+	if len(msg.DataMap) == 0 {
+		msg.DataMap = make(map[string]any)
+	}
+	msg.DataMap["message"] = msg.Data
 
 	// build html mail
 	formattedMessage, err := m.BuildHTMLMessage(msg)
@@ -110,6 +113,12 @@ func (m *Mail) SendMail(msg models.Message, errorChan chan error) {
 	if len(msg.Attachments) > 0 {
 		for _, attachment := range msg.Attachments {
 			email.AddAttachment(attachment)
+		}
+	}
+
+	if len(msg.AttachmentMap) > 0 {
+		for key, value := range msg.AttachmentMap {
+			email.AddAttachment(value, key)
 		}
 	}
 

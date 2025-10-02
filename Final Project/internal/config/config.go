@@ -16,6 +16,8 @@ type AppConfig struct {
 	MailChan      chan models.Message
 	MailErrorChan chan error
 	MailDoneChan  chan bool
+	ErrorChan     chan error
+	ErrorDoneChan chan bool
 	UseCache      bool
 	InProduction  bool
 }
